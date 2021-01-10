@@ -1,3 +1,9 @@
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 class DynProgAlgorithm {
 
@@ -13,71 +19,82 @@ class DynProgAlgorithm {
   }
 
   /**
-   * Attempts to solve the challenge using a dynamic programming approach.
-   * The array will be dp with dimensions:
-   *    - Data.numItems()+1 columns
-   *    - Data.sumValue() rows
+   * GENERAL CHARACTERIZATION
+   *  Attempts to solve the challenge using a dynamic programming approach.
+   *  The array will be dp with dimensions:
+   *      - Data.numItems()+1 columns
+   *      - Data.sumValue() rows
    *
-   * dp[V][i] is the weight of
-   *    - items >= i
-   *    - values >= V
-   * the weight m1 may be exceeded.
-   *
-   * dp[V][i] = min(
-   *    dp[V][i+1],
-   *    w[i] + dp[V - v[i]][i+1]
-   * )
-   * which is the minimum of
-   *    1. the identically valued knapsack without item i (i.e. item i not taken)
-   *    2. the knapsack that is v[i] less valuable than the current one + the weight of item i (i.e. item i taken)
+   *  dp[V][i] is the weight of
+   *      - items >= i
+   *      - values >= V
+   *  the weight m1 may be exceeded.
    *
    *
-   * start-condition at dp[...][Data.numItems()]:
-   *    - overfull knapsack: max weight possible (i.e. all items)
+   * DP CHARACTERIZATION
+   *  dp[V][i] = min(
+   *      dp[V][i+1],
+   *      w[i] + dp[V - v[i]][i+1]
+   *  )
+   *  which is the minimum of
+   *      1. the identically valued knapsack without item i (i.e. item i not taken)
+   *      2. the knapsack that is v[i] less valuable than the current one + the weight of item i (i.e. item i taken)
    *
-   * topological sort:
-   *    - i in Data.numItems()..0
-   *    - V in 0..Data.sumValues()
+   *
+   *  start-condition at dp[...][Data.numItems()]:
+   *      - overfull knapsack: max weight possible (i.e. all items)
+   *
+   *  topological sort:
+   *      - i in Data.numItems()..0
+   *      - V in 0..Data.sumValues()
    *
    *
-   * At the end of the calculation dp[V][i] will represent the minimum weight needed to
-   * achieve a value >= V with items >= i.
+   * RESULT
+   *  At the end of the calculation dp[V][i] will represent the minimum weight needed to
+   *  achieve a value >= V with items >= i.
    *
+   *
+   * CONCURRENCY
+   *  This implementation makes use of threads to calculate the item columns i.
+   *  The columns are divided into NUM_THREADS chunks of same size. Since these chunks are not interdependent
+   *  by construction of the algorithm, there is no need for any producer/consumer pattern.
+   *  Still rows are always computed one at a time.
    */
-  void dynProg() {
+  void dynProg() throws InterruptedException {
     int sumValueHeuristic = Data.sumValuesHeuristic();            //  Heuristic of maximum achievable value
+    final int NUM_THREADS =
+            Runtime.getRuntime().availableProcessors();           //  Constant for number of threads
+    ThreadPoolExecutor executor =
+            (ThreadPoolExecutor)
+                    Executors.newFixedThreadPool(NUM_THREADS);    //  Executor for workers
+    List<Callable<Object>> callables =
+            new ArrayList<>(NUM_THREADS);                         //  List for gathering all workers for invocation
+    List<Worker> runnables =
+            new ArrayList<>(NUM_THREADS);                         //  List for accessing all workers inside the loop
 
     //  Establish the starting condition
-    for (int i = 0; i < dp[dp.length-1].length; i++) {
-      dp[dp.length-1][i] = Data.sumWeight();
+    Arrays.fill(dp[dp.length - 1], Data.sumWeight());
+
+    for (int i = 0; i < NUM_THREADS; i++) {
+      //  Generate new worker
+      Worker r;
+      if (i != NUM_THREADS-1)
+        r = new Worker(i * sumValueHeuristic/3 + i, (i+1) * sumValueHeuristic/3 + i, 0);
+      else
+        r = new Worker(i * sumValueHeuristic/3 + i, sumValueHeuristic-1, 0);
+
+      //  Save as callable & for referencing
+      callables.add(Executors.callable((r)));
+      runnables.add(r);
     }
 
+    //  Main computation loop
     for (int i = Data.numItems() - 1; i >= 0; i--) {
-      for (int V = 0; V < sumValueHeuristic; V++) {
-
-        //  Skip if the value doesn't fit
-        if (V < Data.vget(i)) {
-          dp[i][V] = 0;
-          added[i][V] = false;
-          continue;
-        }
-
-        //  Set the weight for the current field
-        int wAdded = Data.wget(i) + dp[i+1][V - Data.vget(i)];      //  New weight in case item i is added
-        int wNotAdded = dp[i+1][V];                                 //  New weight in case item i is not added
-
-        if (wNotAdded <= wAdded) {
-          dp[i][V] = wNotAdded;
-          added[i][V] = false;
-        }
-        else {
-          dp[i][V] = wAdded;
-          added[i][V] = true;
-        }
-
-      }
+      for (Worker r : runnables) r.row = i;           //  Set current row
+      executor.invokeAll(callables);                  //  Invoke all (waits until all threads terminate)
     }
 
+    executor.shutdown();
     isComputed = true;
   }
 
@@ -125,5 +142,47 @@ class DynProgAlgorithm {
     }
 
     return res;
+  }
+
+  /**
+   * Runnable to fill out one row concurrently.
+   * This is more efficient, if the machine running the code has >= 3 cores.
+   */
+  class Worker implements Runnable {
+
+    int startInd, endInd, row;
+
+    Worker(int startInd, int endInd, int row) {
+      this.startInd = startInd;
+      this.endInd = endInd;
+      this.row = row;
+    }
+
+    @Override
+    public void run() {
+      for (int V = startInd; V <= endInd; V++) {
+
+        //  Skip if the value doesn't fit
+        if (V < Data.vget(row)) {
+          dp[row][V] = 0;
+          added[row][V] = false;
+          continue;
+        }
+
+        //  Set the weight for the current field
+        int wAdded = Data.wget(row) + dp[row+1][V - Data.vget(row)];      //  New weight in case item i is added
+        int wNotAdded = dp[row+1][V];                                     //  New weight in case item i is not added
+
+        if (wNotAdded <= wAdded) {
+          dp[row][V] = wNotAdded;
+          added[row][V] = false;
+        }
+        else {
+          dp[row][V] = wAdded;
+          added[row][V] = true;
+        }
+
+      }
+    }
   }
 }

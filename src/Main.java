@@ -1,11 +1,12 @@
 import java.util.Arrays;
 
 public class Main {
-  public static void main(String[] args) {
+  public static void main(String[] args) throws InterruptedException {
     System.out.print("Initializing... ");
     DynProgAlgorithm d = new DynProgAlgorithm();
     System.out.println("done.");
 
+    long start = System.nanoTime();
     System.out.print("Asking magic code monkeys for solution... ");
     d.dynProg();
     int[] solTruck1 = d.evaluateDynProgSol(Data.m1);          //  Knapsack1
@@ -18,10 +19,17 @@ public class Main {
     d.dynProg();
     int[] solTruck2 = d.evaluateDynProgSol(Data.m2);          //  Knapsack2
 
-    System.out.println("done.\n");
+    System.out.println("done.");
 
+    System.out.println("");
 
     prettyPrintSolution(solTruck1, solTruck2);                //  Print solution
+
+    System.out.println("");
+    System.out.println(
+            "Time elapsed: " + ((System.nanoTime() - start) / 1000000) +
+            "ms w/ " + Runtime.getRuntime().availableProcessors() + " Threads."
+    );                                                        //  Benchmarking
   }
 
   private static void prettyPrintSolution(int[] sol1, int[] sol2) {
