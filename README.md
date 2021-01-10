@@ -12,7 +12,7 @@ Wenn erfolgreich kompiliert wurde, kann das Programm wie folgt ausgeführt werde
 und entsprechend den Anweisungen auf der Seite ausgeführt werden. 
 
 >Anmerkung: Zur Ausführung werden mind. 3GB freien Arbeitsspeichers benötigt. Das flag -Xmx3072m reserviert eben diese 3GB für die Anwendung.
-Es hat auch schon mit weniger geklappt (z.B. -Xmx2048m), jedoch würde ich - sofern möglich - bei den 3GB bleiben. Ansonsten droht evtl. ein `OutOfMmoryError`.
+Es hat auch schon mit weniger geklappt (z.B. -Xmx2048m), jedoch würde ich - sofern möglich - bei den 3GB bleiben. Ansonsten droht evtl. ein `OutOfMemoryError`.
 
 ## Wahl des Algorithmus
 Das Problem ist eine leichte Abwandlung eines ***"Multiple Knapsack Problems"***.<br/>
