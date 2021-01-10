@@ -14,5 +14,5 @@ Die exakte Lösung hierzu zu berechnen ist mit einer solchen Anzahl an items nic
 Deswegen wurde das Problem hier unterteilt in einfache Knapsack Probleme, die mit einer Abwandlung des allgemeinen Lösungsansatzes gelöst werden.
 
 ## Optimale Verteilung
-![](res/screenshot.png)
+<img src="res/screenshot.png" width="500" >
 
