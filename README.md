@@ -14,7 +14,9 @@ und entsprechend den Anweisungen ausgeführt werden.
 ## Wahl des Algorithmus
 Das Problem ist eine leichte Abwandlung eines ***"Multiple Knapsack Problems"***.<br/>
 Die exakte Lösung hierzu zu berechnen ist mit einer solchen Anzahl an items nicht (in vernünfitger Zeit) möglich.<br/>
-Deswegen wird das Problem hier in einfache Knapsack Probleme unterteilt, die mit einer Abwandlung des allgemeinen Lösungsansatzes gelöst werden.
+Deswegen wird das Problem hier in *"einfache Knapsack Probleme"* unterteilt, die mit einer Abwandlung des allgemeinen Lösungsansatzes gelöst werden.<br/>
+Das Ergebnis ist eine Approximation des exakten Ergebnisses. Der hier entstandene Fehler dürfte<br/>
+jedoch aufgrund der geringen Anzahl der *"Knapsacks"* (zwei) nicht allzu stark ins Gewicht fallen.
 
 ## Optimale Verteilung
 <img src="res/screenshot.png" width="500" >
