@@ -11,7 +11,7 @@ Wenn erfolgreich kompiliert wurde, kann das Programm wie folgt ausgeführt werde
 ## Wahl des Algorithmus
 Das Problem ist eine leichte Abwandlung eines ***"Multiple Knapsack Problems"***.<br/>
 Die exakte Lösung hierzu zu berechnen ist mit einer solchen Anzahl an items nicht (in vernünfitger Zeit) möglich.<br/>
-Deswegen wurde das Problem hier unterteilt in einfache Knapsack Probleme, die mit einer Abwandlung des allgemeinen Lösungsansatzes gelöst werden.
+Deswegen wird das Problem hier unterteilt in einfache Knapsack Probleme, die mit einer Abwandlung des allgemeinen Lösungsansatzes gelöst werden.
 
 ## Optimale Verteilung
 <img src="res/screenshot.png" width="500" >
