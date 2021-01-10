@@ -18,7 +18,8 @@ public class Main {
     d.dynProg();
     int[] solTruck2 = d.evaluateDynProgSol(Data.m2);          //  Knapsack2
 
-    System.out.println("done.");
+    System.out.println("done.\n");
+
 
     prettyPrintSolution(solTruck1, solTruck2);                //  Print solution
   }
